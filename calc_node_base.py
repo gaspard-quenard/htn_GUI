@@ -117,8 +117,6 @@ class CalcNode(Node):
 
 
     def onInputChanged(self, socket=None):
-        print(self.input_multi_edged)
-        print(self.output_multi_edged)
         # print("%s::__onInputChanged" % self.__class__.__name__)
         # self.markDirty()
         # self.eval()
