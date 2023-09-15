@@ -10,6 +10,8 @@ from calc_drag_listbox import QDMDragListbox
 from nodeeditor.utils import dumpException, pp
 from calc_conf import CALC_NODES
 
+from hddl_parser import parse_hddl
+
 # Enabling edge validators
 from nodeeditor.node_edge import Edge
 from nodeeditor.node_edge_validators import (
@@ -100,6 +102,8 @@ class CalculatorWindow(NodeEditorWindow):
 
         self.actAbout = QAction("&About", self, statusTip="Show the application's About box", triggered=self.about)
 
+        self.actLoadDomainAndProblemFiles = QAction("Load domain and problem files", self, statusTip="Load Domain & Problem Files", triggered=self.loadDomainAndProblemFiles)
+
     def getCurrentNodeEditorWidget(self):
         """ we're returning NodeEditorWidget here... """
         activeSubWindow = self.mdiArea.activeSubWindow()
@@ -142,6 +146,34 @@ class CalculatorWindow(NodeEditorWindow):
                 "The <b>Calculator NodeEditor</b> example demonstrates how to write multiple "
                 "document interface applications using PyQt5 and NodeEditor. For more information visit: "
                 "<a href='https://www.blenderfreak.com/'>www.BlenderFreak.com</a>")
+        
+
+    def loadDomainAndProblemFiles(self):
+       # Get the domain file path
+        domain_path, _ = QFileDialog.getOpenFileName(self, "Open Domain File", "", "HDDL Files (*.hddl);;All Files (*)")
+        
+        # Check if the user pressed cancel
+        if not domain_path:
+            return
+
+        # Get the problem file path
+        problem_path, _ = QFileDialog.getOpenFileName(self, "Open Problem File", "", "HDDL Files (*.hddl);;All Files (*)")
+
+        # Check if the user pressed cancel
+        if not problem_path:
+            return
+        
+        # First create an empty canvas
+        try:
+            subwnd = self.createMdiChild()
+            subwnd.widget().fileNew()
+            subwnd.show()
+        except Exception as e: 
+            dumpException(e)
+            return
+        
+        # Now that we have an empty canvas, we can parse the hddl domain and problem
+        parse_hddl(domain_path, problem_path)
 
     def createMenus(self):
         super().createMenus()
@@ -154,6 +186,9 @@ class CalculatorWindow(NodeEditorWindow):
 
         self.helpMenu = self.menuBar().addMenu("&Help")
         self.helpMenu.addAction(self.actAbout)
+
+        # Add an option in the File menu to read from a domain and problem file
+        self.fileMenu.addAction(self.actLoadDomainAndProblemFiles)
 
         self.editMenu.aboutToShow.connect(self.updateEditMenu)
 
